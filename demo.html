@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <head>
-    <title>App</title>
-    <style>
-        #map-canvas {
-            width: 500px;
-            height: 400px;
-        }
-    </style>
+    <title>Cloud Clicker</title>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
     <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="quadkey.js"></script>
@@ -14,7 +8,8 @@
         var map;
         var overlay;
         weatherOverlay.prototype = new google.maps.OverlayView();
-        var cross_score = 0, hospital_score = 0, food_score = 0;
+        var cross_score = 0, hospital_score = 0, food_score = 0, weather_score = 0;
+        var pointsTimeout = 10000, pointsLongTimeout = 30000;
         var loc = new google.maps.LatLng(33.711441, -84.347324);
         var occurrance = "none";
 
@@ -22,10 +17,11 @@
             var mapCanvas = document.getElementById('map-canvas');
             var mapOptions = {
                 center: loc,
-                zoom: 10,
+                zoom: 11,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
             map = new google.maps.Map(mapCanvas, mapOptions);
+            map.setOptions({draggable: false, zoomControl: false, scrollwheel: false, disableDoubleClickZoom: true});
             // Using YQL and JSONP
             $.ajax({
                 url: "http://hackathon.weather.com/Maps/jsonserieslist.do",
@@ -68,7 +64,6 @@
                             icon:'red_cross.png'
                         }),
                     ];
-                    */
                     var hospital_markers = [
                         new google.maps.Marker({
                             position:new google.maps.LatLng(33.809372, -84.394597),
@@ -95,7 +90,6 @@
                         });
                         cross_markers[i].setMap(map);
                     }
-                    */
 
                     for (var i = 0; i < hospital_markers.length; i++) {
                         google.maps.event.addListener(hospital_markers[i], 'click', function() {
@@ -107,6 +101,7 @@
                         });
                         hospital_markers[i].setMap(map);
                     }
+                    */
 
                     // Show places from search
                     service = new google.maps.places.PlacesService(map);
@@ -118,8 +113,18 @@
                     service.textSearch({
                         location: loc,
                         radius: '500',
-                        query: 'Atlanta food bank'
+                        query: 'medical center'
+                    }, hospitalCb);
+                    service.textSearch({
+                        location: loc,
+                        radius: '500',
+                        query: 'food bank'
                     }, foodBankCb);
+                    service.textSearch({
+                        location: loc,
+                        radius: '500',
+                        query: '300 Interstate N Pkwy'
+                    }, weatherCompanyCb);
 
                     console.log(response); // server response
                     // console.log(radarLayers);
@@ -142,8 +147,29 @@
                         cross_score++;
                         document.getElementById("cross_score").innerHTML = cross_score;
                         this.setVisible(false);
+                        var that = this;  
+                        setTimeout(function(){that.setVisible(true)}, pointsTimeout);
+                    });
+                    marker.setMap(map);
+                }
+            }
+        }
+
+        function hospitalCb(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                for (var i = 0; i < results.length; i++) {
+                    var place = results[i];
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position:place.geometry.location,
+                        icon:'hospital.png'
+                    });
+                    google.maps.event.addListener(marker, 'click', function() {
+                        hospital_score++;
+                        document.getElementById("hospital_score").innerHTML = hospital_score;
+                        this.setVisible(false);
                         that = this;  
-                        setTimeout(function(){that.setVisible(true)}, 2000);
+                        setTimeout(function(){that.setVisible(true)}, pointsTimeout);
                     });
                     marker.setMap(map);
                 }
@@ -164,7 +190,28 @@
                         document.getElementById("food_score").innerHTML = food_score;
                         this.setVisible(false);
                         that = this;  
-                        setTimeout(function(){that.setVisible(true)}, 2000);
+                        setTimeout(function(){that.setVisible(true)}, pointsTimeout);
+                    });
+                    marker.setMap(map);
+                }
+            }
+        }
+
+        function weatherCompanyCb(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                for (var i = 0; i < results.length; i++) {
+                    var place = results[i];
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position:place.geometry.location,
+                        icon:'logo.png'
+                    });
+                    google.maps.event.addListener(marker, 'click', function() {
+                        weather_score++;
+                        document.getElementById("weather_score").innerHTML = weather_score;
+                        this.setVisible(false);
+                        that = this;  
+                        setTimeout(function(){that.setVisible(true)}, pointsLongTimeout);
                     });
                     marker.setMap(map);
                 }
@@ -235,40 +282,56 @@
           this.div_.parentNode.removeChild(this.div_);
           this.div_ = null;
         };
+
+        setInterval(function(){weatherEvent(Math.random()); }, 10000);
+        function weatherEvent(chance){
+            if (chance < .25){
+                occurrance = "Tornado";
+            } else if (chance < .50){
+                occurrance = "Flood";
+            } else if (chance < .75) {
+                occurrance = "Heat wave";
+            } else {
+                occurrance = "Hurricane";
+            }
+            console.log(occurrance);
+        }
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
-    <script>
-    setInterval(function(){weatherEvent(Math.random()); }, 10000);
-
-      function weatherEvent(chance){
-        if (chance < .25){
-          occurrance = "Tornado";
+    <style>
+        html, body {height: 100%; margin: 0}
+        #header {
+            background-color:white;
+            color:black;
+            text-align:center;
+            font-size:250%;
         }
-        else if (chance < .50){
-          occurrance = "Flood";
+        #map-canvas {
+            float: left;
+            width: 1000px;
+            height: 800px;
         }
-        else if (chance < .75){
-          occurrance = "Heat wave";
+        #content {
+            background-color:white;
+            float: right;
+            margin-right: 100px;
+            height: 100%;
+            font-size: 125%;
         }
-
-        else{
-          occurrance = "Hurricane";
-
-        }
-        console.log(occurrance);
-      }
-
-    </script>
-    </head>
-    <body>
-        <h1>Cloud Clicker</h1>
+    </style>
+</head>
+<body>
+    <div id="header">Cloud Clicker</div>
+    <div id="content">
         <p>Red Cross Points: </p>
         <p id="cross_score"> 0</p>
         <p>Medical Supplies: </p>
         <p id="hospital_score"> 0</p>
         <p>Food: </p>
         <p id="food_score"> 0</p>
-        <div id="map-canvas"></div>
-    </body>
+        <p><br><br>Weather Safety Score: </p>
+        <p id="weather_score"> 0</p>
+    </div>
+    <div id="map-canvas"></div>
 </body>
 </html>
