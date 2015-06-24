@@ -14,7 +14,7 @@
         var map;
         var overlay;
         weatherOverlay.prototype = new google.maps.OverlayView();
-        var cross_score = 0;
+        var cross_score = 0, hospital_score = 0, food_score = 0;
         var loc = new google.maps.LatLng(33.711441, -84.347324);
 
         function initialize() {
@@ -46,8 +46,8 @@
                     var quadKey = getQuadKey(33.711441, -84.347324, 1);
                     quadKey = 0;
 
-                    var swBound = new google.maps.LatLng(33.611441, -84.447324);
-                    var neBound = new google.maps.LatLng(33.811441, -84.247324);
+                    var swBound = new google.maps.LatLng(-40, -90);
+                    var neBound = new google.maps.LatLng(40, 90);
                     var bounds = new google.maps.LatLngBounds(swBound, neBound);
                     var srcImg = "http://gima.weather.com/TileServer/imgs/radar/u"
                         + unixTS + "/" + quadKey + ".png";
@@ -99,20 +99,26 @@
                     for (var i = 0; i < hospital_markers.length; i++) {
                         google.maps.event.addListener(hospital_markers[i], 'click', function() {
                             hospital_score++;
-                            console.log(hospital_score);
+                            document.getElementById("hospital_score").innerHTML = hospital_score;
+                            this.setVisible(false);
+                            that = this;  
+                            setTimeout(function(){that.setVisible(true)}, 2000);
                         });
                         hospital_markers[i].setMap(map);
                     }
 
                     // Show places from search
-                    var request = {
+                    service = new google.maps.places.PlacesService(map);
+                    service.textSearch({
                         location: loc,
                         radius: '500',
                         query: 'Red Cross'
-                    };
-
-                    service = new google.maps.places.PlacesService(map);
-                    service.textSearch(request, searchCb);
+                    }, redCrossCb);
+                    service.textSearch({
+                        location: loc,
+                        radius: '500',
+                        query: 'Atlanta food bank'
+                    }, foodBankCb);
 
                     console.log(response); // server response
                     // console.log(radarLayers);
@@ -122,24 +128,44 @@
             });
         }
 
-        function searchCb(results, status) {
+        function redCrossCb(results, status) {
             if (status == google.maps.places.PlacesServiceStatus.OK) {
                 for (var i = 0; i < results.length; i++) {
                     var place = results[i];
-                    var cross_marker = new google.maps.Marker({
+                    var marker = new google.maps.Marker({
                         map: map,
                         position:place.geometry.location,
                         icon:'red_cross.png'
                     });
-                    google.maps.event.addListener(cross_marker, 'click', function() {
+                    google.maps.event.addListener(marker, 'click', function() {
                         cross_score++;
-                        console.log(cross_score);
-                        document.getElementById("score").innerHTML = cross_score;
+                        document.getElementById("cross_score").innerHTML = cross_score;
                         this.setVisible(false);
                         that = this;  
                         setTimeout(function(){that.setVisible(true)}, 2000);
                     });
-                    cross_marker.setMap(map);
+                    marker.setMap(map);
+                }
+            }
+        }
+
+        function foodBankCb(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                for (var i = 0; i < results.length; i++) {
+                    var place = results[i];
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position:place.geometry.location,
+                        icon:'food_bank.png'
+                    });
+                    google.maps.event.addListener(marker, 'click', function() {
+                        food_score++;
+                        document.getElementById("food_score").innerHTML = food_score;
+                        this.setVisible(false);
+                        that = this;  
+                        setTimeout(function(){that.setVisible(true)}, 2000);
+                    });
+                    marker.setMap(map);
                 }
             }
         }
@@ -223,8 +249,12 @@
     </head>
     <body>
         <h1>Cloud Clicker</h1>
-        <p>Score: </p>
-        <p id="score"> 0</p>
+        <p>Red Cross Points: </p>
+        <p id="cross_score"> 0</p>
+        <p>Medical Supplies: </p>
+        <p id="hospital_score"> 0</p>
+        <p>Food: </p>
+        <p id="food_score"> 0</p>
         <div id="map-canvas"></div>
     </body>
 </body>
