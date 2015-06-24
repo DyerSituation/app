@@ -7,20 +7,24 @@
             height: 400px;
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
     <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
     <script src="quadkey.js"></script>
     <script>
+        var map;
         var overlay;
         weatherOverlay.prototype = new google.maps.OverlayView();
+        var cross_score;
+        var loc = new google.maps.LatLng(33.711441, -84.347324);
+
         function initialize() {
             var mapCanvas = document.getElementById('map-canvas');
             var mapOptions = {
-                center: new google.maps.LatLng(33.711441, -84.347324),
+                center: loc,
                 zoom: 10,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
-            var map = new google.maps.Map(mapCanvas, mapOptions);
+            map = new google.maps.Map(mapCanvas, mapOptions);
             var cross_score = 0;
             // Using YQL and JSONP
             $.ajax({
@@ -52,6 +56,8 @@
 
                     overlay = new weatherOverlay(bounds, srcImg, map);
 
+                    // Place markers on the map
+                    /*
                     var cross_markers = [
                         new google.maps.Marker({
                             position:new google.maps.LatLng(33.711441,-84.347324),
@@ -62,6 +68,7 @@
                             icon:'red_cross.png'
                         }),
                     ];
+                    */
                     var hospital_markers = [
                         new google.maps.Marker({
                             position:new google.maps.LatLng(33.809372, -84.394597),
@@ -72,6 +79,7 @@
                             icon:'hospital.png'
                         }),
                     ];
+                    /*
                     for (var i = 0; i < cross_markers.length; i++) {
                         google.maps.event.addListener(cross_markers[i], 'click', function() {
                             this.setVisible(false);
@@ -87,6 +95,7 @@
                         });
                         cross_markers[i].setMap(map);
                     }
+                    */
 
                     for (var i = 0; i < hospital_markers.length; i++) {
                         google.maps.event.addListener(hospital_markers[i], 'click', function() {
@@ -96,6 +105,16 @@
                         hospital_markers[i].setMap(map);
                     }
 
+                    // Show places from search
+                    var request = {
+                        location: loc,
+                        radius: '500',
+                        query: 'Red Cross'
+                    };
+
+                    service = new google.maps.places.PlacesService(map);
+                    service.textSearch(request, searchCb);
+
                     console.log(response); // server response
                     // console.log(radarLayers);
                     // console.log(mostRecentRadar);
@@ -103,6 +122,25 @@
                 }
             });
         }
+
+        function searchCb(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+                for (var i = 0; i < results.length; i++) {
+                    var place = results[i];
+                    var cross_marker = new google.maps.Marker({
+                        map: map,
+                        position:place.geometry.location,
+                        icon:'red_cross.png'
+                    });
+                    google.maps.event.addListener(cross_marker, 'click', function() {
+                        score++;
+                        console.log(score);
+                    });
+                    cross_marker.setMap(map);
+                }
+            }
+        }
+
         function weatherOverlay(bounds, image, map) {
 
           // Initialize all properties.
