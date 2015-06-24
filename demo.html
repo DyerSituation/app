@@ -16,6 +16,7 @@
         weatherOverlay.prototype = new google.maps.OverlayView();
         var cross_score = 0, hospital_score = 0, food_score = 0;
         var loc = new google.maps.LatLng(33.711441, -84.347324);
+        var occurrance = "none";
 
         function initialize() {
             var mapCanvas = document.getElementById('map-canvas');
@@ -237,14 +238,26 @@
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
     <script>
-    /*
-        var script = document.createElement('script');
-        script.src = "http://hackathon.weather.com/Maps/imgs/radar/u1435108800000/0.png";
-        document.getElementsByTagName('head')[0].appendChild(script);
-        function eqfeed_callback(response) {
-            map.data.addGeoJson(response);
+    setInterval(function(){weatherEvent(Math.random()); }, 10000);
+
+      function weatherEvent(chance){
+        if (chance < .25){
+          occurrance = "Tornado";
         }
-    */
+        else if (chance < .50){
+          occurrance = "Flood";
+        }
+        else if (chance < .75){
+          occurrance = "Heat wave";
+        }
+
+        else{
+          occurrance = "Hurricane";
+
+        }
+        console.log(occurrance);
+      }
+
     </script>
     </head>
     <body>
