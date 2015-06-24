@@ -1,12 +1,62 @@
 <!DOCTYPE html>
-<html>
 <head>
-<title>Page Title</title>
-</head>
-<body>
+    <title>App</title>
+    <style>
+      #map-canvas {
+        width: 500px;
+        height: 400px;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>   //library that helps you calls 
+    <script>
+      function initialize() {
+        var mapCanvas = document.getElementById('map-canvas');
+        var mapOptions = {
+          center: new google.maps.LatLng(33.711441, -84.347324),
+          zoom: 10,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        }
+        var map = new google.maps.Map(mapCanvas, mapOptions);
 
-<h1>My First Heading</h1>
-<p>My first paragraph.</p>
+        // Using YQL and JSONP
+    $.ajax({
+        url: "http://hackathon.weather.com/Maps/jsonserieslist.do",
+     
+        // The name of the callback parameter, as specified by the YQL service
+        jsonp: "cb",
+     
+        // Tell jQuery we're expecting JSONP
+        dataType: "jsonp",
+     
+        
+        // Work with the response
+        success: function( response ) {
+            var radarLayers = response.seriesInfo.radar.series;
+            var mostRecentRadar = radarLayers[0];
+            var unixTS = mostRecentRadar.unixDate;
 
+            // Now we want to overlay on top of the map
+
+            console.log( response ); // server response
+        }
+    });
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+    <script>
+    var script = document.createElement('script');
+script.src = 'http://hackathon.weather.com';
+document.getElementsByTagName('head')[0].appendChild(script);
+  </script>
+  function eqfeed_callback(response) {
+  map.data.addGeoJson(response);
+}
+  </head>
+  <body>
+    <h1>Web app</h1>
+    <p>My first map</p>
+    <div id="map-canvas"></div>
+  </body>
 </body>
 </html>
