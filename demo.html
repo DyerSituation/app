@@ -11,7 +11,7 @@
         var cross_score = 0, hospital_score = 0, food_score = 0, weather_score = 0;
         var pointsTimeout = 10000, pointsLongTimeout = 30000;
         var loc = new google.maps.LatLng(33.711441, -84.347324);
-        var occurrance = "none";
+        var occurrence = "none";
 
         function initialize() {
             var mapCanvas = document.getElementById('map-canvas');
@@ -168,7 +168,7 @@
                         hospital_score++;
                         document.getElementById("hospital_score").innerHTML = hospital_score;
                         this.setVisible(false);
-                        that = this;  
+                        var that = this;  
                         setTimeout(function(){that.setVisible(true)}, pointsTimeout);
                     });
                     marker.setMap(map);
@@ -189,7 +189,7 @@
                         food_score++;
                         document.getElementById("food_score").innerHTML = food_score;
                         this.setVisible(false);
-                        that = this;  
+                        var that = this;  
                         setTimeout(function(){that.setVisible(true)}, pointsTimeout);
                     });
                     marker.setMap(map);
@@ -207,11 +207,11 @@
                         icon:'logo.png'
                     });
                     google.maps.event.addListener(marker, 'click', function() {
-                        weather_score++;
-                        document.getElementById("weather_score").innerHTML = weather_score;
-                        this.setVisible(false);
-                        that = this;  
-                        setTimeout(function(){that.setVisible(true)}, pointsLongTimeout);
+                        // weather_score++;
+                        // document.getElementById("weather_score").innerHTML = weather_score;
+                        // this.setVisible(false);
+                        // var that = this;  
+                        // setTimeout(function(){that.setVisible(true)}, pointsLongTimeout);
                     });
                     marker.setMap(map);
                 }
@@ -283,18 +283,58 @@
           this.div_ = null;
         };
 
-        setInterval(function(){weatherEvent(Math.random()); }, 10000);
+        setInterval(function(){weatherEvent(Math.random()); }, 30000);
         function weatherEvent(chance){
             if (chance < .25){
-                occurrance = "Tornado";
+                occurrence = "Tornado";
+                if (cross_score >= 3 && hospital_score >= 5) {
+                    window.alert("Tornado warning. You headed for the Red Cross shelter and were able to provide medical supplies. Your Weather Safety Score went up!");
+                    weather_score += 200;
+                } else {
+                    window.alert("Tornado warning. You were caught unprepared, and lost some assets. Be prepared for the next tornado by educating yourself on Red Cross shelter locations and where to find emergency medical supplies!");
+                    weather_score -= 200;
+                }
+                cross_score = cross_score >= 3 ? cross_score - 3 : 0;
+                hospital_score = hospital_score >= 5 ? hospital_score - 5 : 0;
             } else if (chance < .50){
-                occurrance = "Flood";
+                occurrence = "Flood";
+                if (cross_score >= 3 && hospital_score >= 5 && food_score >= 5) {
+                    window.alert("Hurricane warning along with a flood watch. You followed the Red Cross evacuation plan and were able to provide food and medical supplies. Your Weather Safety Score went up!");
+                    weather_score += 300;
+                } else {
+                    window.alert("Hurricane warning along with a flood watch. You were caught unprepared, and lost some assets. Be prepared for the next hurricane by educating yourself on the Red Cross evacuation plan and where to find emergency food banks and medical supplies!");
+                    weather_score -= 300;
+                }
+                cross_score = cross_score >= 3 ? cross_score - 3 : 0;
+                hospital_score = hospital_score >= 5 ? hospital_score - 5 : 0;
+                food_score = food_score >= 5 ? food_score - 5 : 0;
             } else if (chance < .75) {
-                occurrance = "Heat wave";
+                occurrence = "Heat wave";
+                if (cross_score >= 3 && hospital_score >= 10) {
+                    window.alert("Excessive heat warning. You headed for the Red Cross shelter and were able to provide medical supplies. Your Weather Safety Score went up!");
+                    weather_score += 300;
+                } else {
+                    window.alert("Excessive heat warning. You were caught unprepared, and lost some assets. Be prepared for the next heat wave by educating yourself on Red Cross shelter locations and where to find emergency medical supplies!");
+                    weather_score -= 300;
+                }
+                cross_score = cross_score >= 3 ? cross_score - 3 : 0;
+                hospital_score = hospital_score >= 10 ? hospital_score - 10 : 0;
             } else {
-                occurrance = "Hurricane";
+                occurrence = "Winter storm";
+                if (cross_score >= 3 && food_score >= 10) {
+                    window.alert("Winter storm warning. You followed the Red Cross winter storm safety checklist and were able to provide food supplies. Your Weather Safety Score went up!");
+                    weather_score += 300;
+                } else {
+                    window.alert("Winter storm warning. You were caught unprepared, and lost some assets. Be prepared for the next blizzard by educating yourself on the Red Cross safety checklists and where to find emergency food supplies!");
+                    weather_score -= 300;
+                }
+                cross_score = cross_score >= 3 ? cross_score - 3 : 0;
+                food_score = food_score >= 10 ? food_score - 10 : 0;
             }
-            console.log(occurrance);
+            document.getElementById("cross_score").innerHTML = cross_score;
+            document.getElementById("hospital_score").innerHTML = hospital_score;
+            document.getElementById("food_score").innerHTML = food_score;
+            document.getElementById("weather_score").innerHTML = weather_score;
         }
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
@@ -314,7 +354,7 @@
         #content {
             background-color:white;
             float: right;
-            margin-right: 100px;
+            margin-right: 80px;
             height: 100%;
             font-size: 125%;
         }
@@ -323,13 +363,14 @@
 <body>
     <div id="header">Cloud Clicker</div>
     <div id="content">
-        <p>Red Cross Points: </p>
+        <p>Knowledge Points: </p>
+        <p><img src="red_cross.png">Red Cross: </p>
         <p id="cross_score"> 0</p>
-        <p>Medical Supplies: </p>
+        <p><img src="hospital.png">Medical Centers: </p>
         <p id="hospital_score"> 0</p>
-        <p>Food: </p>
+        <p><img src="food_bank.png">Food Banks: </p>
         <p id="food_score"> 0</p>
-        <p><br><br>Weather Safety Score: </p>
+        <p><br><br><img src="logo.png">Weather Safety Score: </p>
         <p id="weather_score"> 0</p>
     </div>
     <div id="map-canvas"></div>
