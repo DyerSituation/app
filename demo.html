@@ -14,7 +14,7 @@
         var map;
         var overlay;
         weatherOverlay.prototype = new google.maps.OverlayView();
-        var cross_score;
+        var cross_score = 0;
         var loc = new google.maps.LatLng(33.711441, -84.347324);
 
         function initialize() {
@@ -25,7 +25,6 @@
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
             map = new google.maps.Map(mapCanvas, mapOptions);
-            var cross_score = 0;
             // Using YQL and JSONP
             $.ajax({
                 url: "http://hackathon.weather.com/Maps/jsonserieslist.do",
@@ -135,6 +134,7 @@
                     google.maps.event.addListener(cross_marker, 'click', function() {
                         cross_score++;
                         console.log(cross_score);
+                        document.getElementById("score").innerHTML = cross_score;
                         this.setVisible(false);
                         that = this;  
                         setTimeout(function(){that.setVisible(true)}, 2000);
@@ -224,6 +224,7 @@
     <body>
         <h1>Cloud Clicker</h1>
         <p>Score: </p>
+        <p id="score"> 0</p>
         <div id="map-canvas"></div>
     </body>
 </body>
