@@ -21,7 +21,7 @@
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             }
             var map = new google.maps.Map(mapCanvas, mapOptions);
-            var score = 0;
+            var cross_score = 0;
             // Using YQL and JSONP
             $.ajax({
                 url: "http://hackathon.weather.com/Maps/jsonserieslist.do",
@@ -52,7 +52,7 @@
 
                     overlay = new weatherOverlay(bounds, srcImg, map);
 
-                    var markers = [
+                    var cross_markers = [
                         new google.maps.Marker({
                             position:new google.maps.LatLng(33.711441,-84.347324),
                             icon:'red_cross.png'
@@ -62,13 +62,38 @@
                             icon:'red_cross.png'
                         }),
                     ];
+                    var hospital_markers = [
+                        new google.maps.Marker({
+                            position:new google.maps.LatLng(33.809372, -84.394597),
+                            icon:'hospital.png'
+                        }),
+                        new google.maps.Marker({
+                            position:new google.maps.LatLng(33.768764, -84.386344),
+                            icon:'hospital.png'
+                        }),
+                    ];
+                    for (var i = 0; i < cross_markers.length; i++) {
+                        google.maps.event.addListener(cross_markers[i], 'click', function() {
+                            this.setVisible(false);
+                            that = this;
+                            cross_score++;
+                            var currentTimeMillis = new Date().getTime();
+                            setTimeout(function(){ that.setVisible(true); }, 3000);
+                            //if (currentTimeMillis % 5000 == 0) {
+                                
+                          
 
-                    for (var i = 0; i < markers.length; i++) {
-                        google.maps.event.addListener(markers[i], 'click', function() {
-                            score++;
-                            console.log(score);
+                            console.log(cross_score);
                         });
-                        markers[i].setMap(map);
+                        cross_markers[i].setMap(map);
+                    }
+
+                    for (var i = 0; i < hospital_markers.length; i++) {
+                        google.maps.event.addListener(hospital_markers[i], 'click', function() {
+                            hospital_score++;
+                            console.log(hospital_score);
+                        });
+                        hospital_markers[i].setMap(map);
                     }
 
                     console.log(response); // server response
