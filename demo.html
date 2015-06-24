@@ -133,8 +133,11 @@
                         icon:'red_cross.png'
                     });
                     google.maps.event.addListener(cross_marker, 'click', function() {
-                        score++;
-                        console.log(score);
+                        cross_score++;
+                        console.log(cross_score);
+                        this.setVisible(false);
+                        that = this;  
+                        setTimeout(function(){that.setVisible(true)}, 2000);
                     });
                     cross_marker.setMap(map);
                 }
